@@ -2,33 +2,42 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/http"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gin-gonic/gin"
+
+	"backend/config"
+	"backend/internal/aws"
+	"backend/internal/handlers"
+	"backend/internal/routes"
 )
 
 func main() {
+	// Load configuration
+	cfg := config.Load()
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion("us-east-1"))
-	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
+	// Initialize S3 client if bucket is configured
+	if cfg.S3Bucket != "" {
+		ctx := context.Background()
+		s3Client, err := aws.NewS3Client(ctx, cfg.AWSRegion, cfg.S3Bucket)
+		if err != nil {
+			log.Printf("Warning: Failed to initialize S3 client: %v", err)
+		} else {
+			handlers.SetS3Client(s3Client)
+			log.Printf("S3 client initialized for bucket: %s", cfg.S3Bucket)
+		}
 	}
 
-	// Using the Config value, create the DynamoDB client
-	svc := dynamodb.NewFromConfig(cfg)
-	// TODO: just printing for now. 
-	fmt.Print(svc)
-
+	// Initialize Gin router
 	r := gin.Default()
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	r.Run()
+	// Setup routes (public + protected)
+	routes.SetupRoutes(r, []byte(cfg.JWTSecret))
+
+	// Start server
+	log.Printf("Server starting on port %s", cfg.Port)
+	if err := r.Run(":" + cfg.Port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
+
