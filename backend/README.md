@@ -1,261 +1,167 @@
-# Backend API with JWT Authentication
+# Backend API
 
-A Go backend API built with Gin framework featuring JWT-based authentication.
+> Part of the Kaimz TDR project - See [root README](../README.md) for full project overview
 
-## Features
+Go backend API for the Kaimz AI Agent with JWT authentication and S3 log storage.
 
-- ✅ User registration and login
-- ✅ JWT token generation and validation
-- ✅ Password hashing with bcrypt
-- ✅ Protected routes with middleware
-- ✅ Role-based access control example
-- ✅ In-memory user storage (replace with database in production)
+## Quick Setup
+
+### 1. Install Dependencies
+```bash
+go mod download
+```
+
+### 2. Configure AWS Credentials
+
+**Option A: AWS CLI (Recommended)**
+```bash
+aws configure
+```
+
+**Option B: Manual Setup**
+
+Create `~/.aws/credentials`:
+```bash
+mkdir -p ~/.aws
+nano ~/.aws/credentials
+```
+```ini
+[kaimz_tdr]
+aws_access_key_id = YOUR_ACCESS_KEY_ID
+aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
+```
+
+Create `~/.aws/config`:
+```bash
+nano ~/.aws/config
+```
+```ini
+[kaimz_tdr]
+region = us-east-1
+```
+
+### 3. Environment Variables
+
+```bash
+cp .env.example .env
+# Edit .env and set:
+# - JWT_SECRET (generate: openssl rand -base64 32)
+# - S3_BUCKET (your S3 bucket name)
+# - AWS_REGION (default: us-east-1)
+```
+
+### 4. Run
+
+```bash
+export $(cat .env | xargs)
+go run cmd/main.go
+```
+
+Server: `http://localhost:8080`
+
+## API Reference
+
+### Authentication
+
+**Register:**
+```bash
+POST /auth/register
+{"email": "user@example.com", "password": "pass123"}
+```
+
+**Login:**
+```bash
+POST /auth/login
+{"email": "user@example.com", "password": "pass123"}
+```
+Returns: `{"token": "...", "user": {...}}`
+
+### Protected Endpoints
+
+Requires header: `Authorization: Bearer <token>`
+
+**Get user info:**
+```bash
+GET /api/me
+```
+
+**Upload log:**
+```bash
+POST /api/logs/upload
+{"log": "your log content", "filename": "optional/custom/path.log"}
+```
+
+**List logs:**
+```bash
+GET /api/logs
+```
 
 ## Project Structure
 
 ```
 backend/
-├── cmd/
-│   └── main.go              # Application entry point
-├── config/
-│   └── config.go            # Configuration management
+├── cmd/main.go              # Entry point
+├── config/config.go         # Environment config
 ├── internal/
-│   ├── auth/
-│   │   ├── jwt.go           # JWT token generation
-│   │   ├── middleware.go    # Authentication middleware
-│   │   └── password.go      # Password hashing utilities
-│   ├── handlers/
-│   │   ├── auth.go          # Auth handlers (register, login)
-│   │   └── user.go          # User handlers (profile, etc.)
-│   ├── models/
-│   │   └── user.go          # Data models
-│   └── routes/
-│       └── routes.go        # Route definitions
-├── .env.example             # Example environment variables
-└── go.mod                   # Go module dependencies
+│   ├── auth/               # JWT + password hashing
+│   ├── aws/                # S3 client
+│   ├── handlers/           # API handlers
+│   ├── models/             # Data models
+│   └── routes/             # Route setup
+├── Dockerfile              # Container config
+└── .env.example            # Environment template
 ```
-
-## Setup
-
-### 1. Install Dependencies
-
-```bash
-cd backend
-go mod download
-```
-
-### 2. Configure Environment
-
-```bash
-# Copy example env file
-cp .env.example .env
-
-# Edit .env and set a strong JWT_SECRET
-# You can generate a random secret with:
-openssl rand -base64 32
-```
-
-### 3. Run the Server
-
-```bash
-# Export environment variables
-export $(cat .env | xargs)
-
-# Run the server
-go run cmd/main.go
-```
-
-Server will start on `http://localhost:8080`
-
-## API Endpoints
-
-### Public Endpoints (No Authentication Required)
-
-#### Health Check
-```bash
-GET /health
-```
-
-#### Register
-```bash
-POST /auth/register
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "role": "user"  // optional, defaults to "user"
-}
-```
-
-**Response:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "role": "user",
-    "created_at": "2025-10-16T..."
-  }
-}
-```
-
-#### Login
-```bash
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-**Response:**
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "role": "user",
-    "created_at": "2025-10-16T..."
-  }
-}
-```
-
-### Protected Endpoints (Require JWT Token)
-
-All protected endpoints require the `Authorization` header:
-```
-Authorization: Bearer <your-jwt-token>
-```
-
-#### Get Profile
-```bash
-GET /api/profile
-Authorization: Bearer <token>
-```
-
-**Response:**
-```json
-{
-  "user_id": "uuid",
-  "email": "user@example.com",
-  "role": "user"
-}
-```
-
-#### Update Profile
-```bash
-PUT /api/profile
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "John Doe"
-}
-```
-
-#### Protected Example
-```bash
-GET /api/protected
-Authorization: Bearer <token>
-```
-
-#### Get All Users (Admin Only)
-```bash
-GET /api/users
-Authorization: Bearer <token>
-```
-*Note: Only works if the JWT role is "admin"*
-
-## Testing with cURL
-
-### 1. Register a new user
-```bash
-curl -X POST http://localhost:8080/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "password123"
-  }'
-```
-
-### 2. Save the token
-```bash
-# Copy the token from response and save it
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-```
-
-### 3. Access protected route
-```bash
-curl http://localhost:8080/api/profile \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-### 4. Test without token (should fail)
-```bash
-curl http://localhost:8080/api/profile
-# Response: {"error":"missing authorization header"}
-```
-
-## Testing with Postman/Thunder Client
-
-1. **Register:** POST to `http://localhost:8080/auth/register` with JSON body
-2. **Copy token** from response
-3. **Add Authorization header** to protected requests:
-   - Type: Bearer Token
-   - Token: (paste your JWT)
-4. **Make requests** to `/api/*` endpoints
-
-## Production Considerations
-
-⚠️ **Current implementation uses in-memory storage** - users are lost when server restarts.
-
-### Before deploying to production:
-
-1. **Add a database:**
-   - PostgreSQL, MySQL, or MongoDB
-   - Implement proper user repository pattern
-   - Add database migrations
-
-2. **Security enhancements:**
-   - Use environment variables for secrets (never commit `.env`)
-   - Implement refresh tokens (short-lived access + long-lived refresh)
-   - Add token blacklist for logout
-   - Rate limiting on auth endpoints
-   - HTTPS only in production
-   - CORS configuration
-   - Input validation and sanitization
-
-3. **Additional features:**
-   - Email verification
-   - Password reset flow
-   - Two-factor authentication
-   - Account lockout after failed attempts
-   - Audit logging
-
-4. **Monitoring:**
-   - Add structured logging
-   - Metrics and monitoring
-   - Error tracking
 
 ## Environment Variables
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `JWT_SECRET` | Secret key for signing JWT tokens | - | ✅ Yes |
-| `PORT` | Server port | 8080 | No |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `JWT_SECRET` | Yes | JWT signing secret |
+| `S3_BUCKET` | Yes | S3 bucket for logs |
+| `AWS_REGION` | No | Default: us-east-1 |
+| `PORT` | No | Default: 8080 |
 
-## Dependencies
+## Quick Test
 
-- `github.com/gin-gonic/gin` - Web framework
-- `github.com/golang-jwt/jwt/v5` - JWT implementation
-- `golang.org/x/crypto/bcrypt` - Password hashing
-- `github.com/google/uuid` - UUID generation
+```bash
+# Register & get token
+TOKEN=$(curl -s -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"pass123"}' | jq -r '.token')
 
-## License
+# Upload log
+curl -X POST http://localhost:8080/api/logs/upload \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"log":"Test log message"}' | jq .
 
-MIT
+# List logs
+curl http://localhost:8080/api/logs \
+  -H "Authorization: Bearer $TOKEN" | jq .
+```
+
+## Docker
+
+```bash
+docker build -t kaimz-backend .
+docker run -p 8080:8080 \
+  -e JWT_SECRET="your-secret" \
+  -e S3_BUCKET="your-bucket" \
+  -v ~/.aws:/root/.aws:ro \
+  kaimz-backend
+```
+
+## Notes
+
+- Users stored in-memory (restart clears data)
+- Logs stored at `s3://bucket/logs/YYYY-MM-DD_HH-MM-SS.log`
+- AWS credentials from `~/.aws/credentials`
+
+## Tech Stack
+
+- **Framework:** Gin
+- **Auth:** JWT v5 + bcrypt
+- **Cloud:** AWS SDK v2 (S3)
+- **UUID:** google/uuid
+
+
