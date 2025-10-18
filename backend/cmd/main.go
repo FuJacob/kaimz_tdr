@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
 	"backend/config"
 	"backend/internal/aws"
@@ -13,6 +14,13 @@ import (
 )
 
 func main() {
+	// Load .env file (like in Express.js)
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found, using system environment variables")
+	} else {
+		log.Println("✅ Loaded .env file")
+	}
+
 	// Load configuration
 	cfg := config.Load()
 
@@ -40,4 +48,3 @@ func main() {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
-

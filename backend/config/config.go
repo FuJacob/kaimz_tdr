@@ -31,7 +31,7 @@ func Load() *Config {
 
 	s3Bucket := os.Getenv("S3_BUCKET")
 	if s3Bucket == "" {
-		s3Bucket = "kaimz_tdr"
+		s3Bucket = "kaimz-tdr"
 	}
 
 	return &Config{

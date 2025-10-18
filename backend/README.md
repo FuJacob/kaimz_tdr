@@ -7,6 +7,7 @@ Go backend API for the Kaimz AI Agent with JWT authentication and S3 log storage
 ## Quick Setup
 
 ### 1. Install Dependencies
+
 ```bash
 go mod download
 ```
@@ -14,6 +15,7 @@ go mod download
 ### 2. Configure AWS Credentials
 
 **Option A: AWS CLI (Recommended)**
+
 ```bash
 aws configure
 ```
@@ -21,22 +23,26 @@ aws configure
 **Option B: Manual Setup**
 
 Create `~/.aws/credentials`:
+
 ```bash
 mkdir -p ~/.aws
 nano ~/.aws/credentials
 ```
+
 ```ini
-[kaimz_tdr]
+[kaimz-tdr]
 aws_access_key_id = YOUR_ACCESS_KEY_ID
 aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
 ```
 
 Create `~/.aws/config`:
+
 ```bash
 nano ~/.aws/config
 ```
+
 ```ini
-[kaimz_tdr]
+[kaimz-tdr]
 region = us-east-1
 ```
 
@@ -64,16 +70,19 @@ Server: `http://localhost:8080`
 ### Authentication
 
 **Register:**
+
 ```bash
 POST /auth/register
 {"email": "user@example.com", "password": "pass123"}
 ```
 
 **Login:**
+
 ```bash
 POST /auth/login
 {"email": "user@example.com", "password": "pass123"}
 ```
+
 Returns: `{"token": "...", "user": {...}}`
 
 ### Protected Endpoints
@@ -81,17 +90,20 @@ Returns: `{"token": "...", "user": {...}}`
 Requires header: `Authorization: Bearer <token>`
 
 **Get user info:**
+
 ```bash
 GET /api/me
 ```
 
 **Upload log:**
+
 ```bash
 POST /api/logs/upload
 {"log": "your log content", "filename": "optional/custom/path.log"}
 ```
 
 **List logs:**
+
 ```bash
 GET /api/logs
 ```
@@ -114,12 +126,12 @@ backend/
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `JWT_SECRET` | Yes | JWT signing secret |
-| `S3_BUCKET` | Yes | S3 bucket for logs |
-| `AWS_REGION` | No | Default: us-east-1 |
-| `PORT` | No | Default: 8080 |
+| Variable     | Required | Description        |
+| ------------ | -------- | ------------------ |
+| `JWT_SECRET` | Yes      | JWT signing secret |
+| `S3_BUCKET`  | Yes      | S3 bucket for logs |
+| `AWS_REGION` | No       | Default: us-east-1 |
+| `PORT`       | No       | Default: 8080      |
 
 ## Quick Test
 
@@ -163,5 +175,3 @@ docker run -p 8080:8080 \
 - **Auth:** JWT v5 + bcrypt
 - **Cloud:** AWS SDK v2 (S3)
 - **UUID:** google/uuid
-
-

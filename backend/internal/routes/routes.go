@@ -27,11 +27,14 @@ func SetupRoutes(r *gin.Engine, secret []byte) {
 	{
 		// Example protected endpoint - returns user info from JWT
 		api.GET("/me", handlers.GetCurrentUser())
-		
+
 		// S3 Log upload endpoints
 		api.POST("/logs/upload", handlers.UploadLog())
 		api.GET("/logs", handlers.ListLogs())
 		
+		// Network logs - fetch macOS network logs and upload to S3
+		api.POST("/logs/fetch-network", handlers.FetchAndUploadLogs())
+
 		// Any other protected routes go here
 		// api.GET("/data", handlers.GetData())
 		// api.POST("/action", handlers.DoAction())

@@ -17,11 +17,13 @@ cp .env.example .env
 ### 2. Configure AWS Credentials
 
 Option A - AWS CLI (recommended):
+
 ```bash
 aws configure
 ```
 
 Option B - Environment variables:
+
 ```bash
 export AWS_ACCESS_KEY_ID=your-key
 export AWS_SECRET_ACCESS_KEY=your-secret
@@ -140,11 +142,7 @@ Make sure your S3 bucket exists and your AWS credentials have permissions:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:ListBucket"
-      ],
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
       "Resource": [
         "arn:aws:s3:::your-bucket-name/*",
         "arn:aws:s3:::your-bucket-name"
