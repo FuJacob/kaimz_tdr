@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 
-	"backend/internal/auth"
+	// "backend/internal/auth"
 	"backend/internal/handlers"
 )
 
@@ -23,7 +23,7 @@ func SetupRoutes(r *gin.Engine, secret []byte) {
 
 	// Protected routes - require valid JWT
 	api := r.Group("/api")
-	api.Use(auth.AuthMiddleware(secret)) // Apply authentication middleware
+	// api.Use(auth.AuthMiddleware(secret)) // Apply authentication middleware
 	{
 		// Example protected endpoint - returns user info from JWT
 		api.GET("/me", handlers.GetCurrentUser())

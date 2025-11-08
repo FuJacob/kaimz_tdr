@@ -10,6 +10,7 @@ import (
 	"backend/config"
 	"backend/internal/aws"
 	"backend/internal/handlers"
+	"backend/internal/logging"
 	"backend/internal/routes"
 )
 
@@ -33,6 +34,21 @@ func main() {
 		} else {
 			handlers.SetS3Client(s3Client)
 			log.Printf("S3 client initialized for bucket: %s", cfg.S3Bucket)
+
+			// Fetch and upload logs on startup (once)
+			log.Println("🔄 Fetching network logs on startup...")
+			logs := logging.FetchLogs(60) // Fetch last 60 minutes of logs
+			
+			if logs != "" {
+				url, err := s3Client.UploadLog(ctx, logs)
+				if err != nil {
+					log.Printf("❌ Failed to upload startup logs to S3: %v", err)
+				} else {
+					log.Printf("✅ Startup logs uploaded to S3: %s", url)
+				}
+			} else {
+				log.Println("⚠️  No logs fetched on startup")
+			}
 		}
 	}
 
