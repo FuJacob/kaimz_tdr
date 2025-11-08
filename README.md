@@ -2,11 +2,11 @@
 
 **Riipen Project** - AI Agent Development for Kaimz
 
-This repository contains the backend infrastructure and development work for the **Kaimz AI Agent**, an intelligent automation system currently under active development. This project is part of our Riipen collaboration focused on building production-ready AI agent capabilities.
+This repository contains the backend infrastructure and development work for the **Kaimz Agent**, an intelligent automation system currently under active development. This project is part of our Riipen collaboration focused on building production-ready AI agent capabilities.
 
 ## Project Overview
 
-Kaimz TDR serves as the technical backbone for the Kaimz AI Agent, providing:
+Kaimz TDR serves as the technical backbone for the Kaimz Agent, providing:
 
 - **Authentication & Authorization** - JWT-based user management
 - **Cloud Integration** - AWS S3 for log storage and data persistence
@@ -185,4 +185,4 @@ This is an active development repository. For questions or collaboration:
 
 ## License
 
-Proprietary - Kaimz AI Agent Development Project
+Proprietary - Kaimz Agent Development Project
