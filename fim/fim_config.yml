@@ -1,0 +1,83 @@
+# FIM Configuration - Endpoint Deployment
+# Lightweight file integrity monitoring for production endpoints
+
+# General Settings
+fim_settings:
+  enabled: true
+  scan_interval: 600  # 10 minutes
+  real_time_monitoring: true
+  log_level: WARN
+  output_format: JSON
+
+# Critical Directories Only
+monitored_directories:
+  # Windows system configuration
+  - path: "C:\\Windows\\System32\\config"
+    name: "system_registry"
+    recursive: true
+    enabled: true
+    priority: "CRITICAL"
+    file_types:
+      - "SAM"
+      - "SECURITY"
+      - "SOFTWARE"
+      - "SYSTEM"
+    exclude_patterns:
+      - "*.log"
+      - "*.tmp"
+      - "*.evt"
+  # Downloads
+  - path: "C:\\Users\\[Username]\\Downloads"
+    name: "downloads"
+    recursive: false
+    enabled: true
+    priority: "HIGH"
+    file_types:
+      - "*"
+    exclude_patterns:
+      - "Microsoft*"
+      - "Windows*"
+
+# Monitoring Rules
+monitoring_rules:
+  detect_changes:
+    file_creation: true
+    file_deletion: true
+    file_modification: true
+    permission_changes: true
+  
+  hash_algorithms:
+    primary: "SHA256"
+
+# Alerts - Endpoint focused
+alerts:
+  thresholds:
+    critical_changes: 1
+    high_changes: 1
+  
+  methods:
+    syslog:
+      enabled: true
+      server: "localhost"
+      port: 514
+    
+    file_log:
+      enabled: true
+      log_file: "C:\\Windows\\Logs\\fim_alerts.log"
+
+# Minimal exclusions
+exclusions:
+  global_patterns:
+    - "*.log"
+    - "*.tmp"
+    - "*.pid"
+    - "*.lock"
+
+# Optional: Windows Event Log channels to subscribe
+event_channels:
+  - "Security"
+  - "System"
+  - "Application"
+  # Examples you can add if present:
+  # - "Microsoft-Windows-PowerShell/Operational"
+  # - "Microsoft-Windows-Sysmon/Operational"
