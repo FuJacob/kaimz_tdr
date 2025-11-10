@@ -23,7 +23,13 @@ func NewS3Client(ctx context.Context, region, bucket string) (*S3Client, error) 
 		config.WithRegion(region),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("unable to load SDK config: %w", err)
+		fmt.Println("Failed to load SDK Config using SharedConfigProfile. Attempting to use environment (.env) variables now.")
+
+		cfg, err = config.LoadDefaultConfig(context.TODO())
+
+		if err != nil {
+		return nil, fmt.Errorf("unable to load SDK config: %w from using SharedConfigProfile and environment variables", err)
+		}
 	}
 
 	return &S3Client{
