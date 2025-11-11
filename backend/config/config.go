@@ -22,7 +22,7 @@ func Load() *Config {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // default port
+		port = "1514" // default port (Wazuh agent port)
 	}
 
 	awsRegion := os.Getenv("AWS_REGION")

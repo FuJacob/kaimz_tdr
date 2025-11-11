@@ -16,10 +16,10 @@ type S3Client struct {
 	bucket string
 }
 
-// NewS3Client creates a new S3 client using the kaimz_tdr AWS profile
+// NewS3Client creates a new S3 client using the kaimz-tdr AWS profile
 func NewS3Client(ctx context.Context, region, bucket string) (*S3Client, error) {
 	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithSharedConfigProfile("kaimz_tdr"),
+		config.WithSharedConfigProfile("kaimz-tdr"),
 		config.WithRegion(region),
 	)
 	if err != nil {

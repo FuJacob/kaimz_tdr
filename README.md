@@ -1,187 +1,204 @@
 # Kaimz TDR (Technical Design Report)
 
-**Riipen Project** - AI Agent Development for Kaimz
+**Riipen Project** - AI Agent Infrastructure for Kaimz
 
-This repository contains the backend infrastructure and development work for the **Kaimz Agent**, an intelligent automation system currently under active development. This project is part of our Riipen collaboration focused on building production-ready AI agent capabilities.
+Backend infrastructure for the **Kaimz Agent**, an intelligent automation system that monitors and uploads network logs to AWS S3. Built as part of our Riipen collaboration.
 
-## Project Overview
+## Features
 
-Kaimz TDR serves as the technical backbone for the Kaimz Agent, providing:
-
-- **Authentication & Authorization** - JWT-based user management
-- **Cloud Integration** - AWS S3 for log storage and data persistence
-- **API Infrastructure** - RESTful endpoints for agent operations
-- **Scalable Architecture** - Foundation for future AI agent features
-
-## Repository Structure
-
-```
-kaimz_tdr/
-├── backend/          # Go API server with JWT auth + S3
-├── agent.c           # Agent development artifacts
-└── README.md         # This file
-```
+- 🔒 **JWT Authentication** - Secure user management with bcrypt
+- ☁️ **AWS S3 Integration** - Automatic log uploads to S3
+- 📊 **Network Log Monitoring** - Cross-platform (Windows/macOS) log collection
+- ⏰ **Flexible Scheduling** - One-time or recurring log fetching
+- 🚀 **RESTful API** - Clean endpoints for all operations
 
 ## Tech Stack
 
-- **Backend:** Go + Gin framework
-- **Auth:** JWT with bcrypt password hashing
-- **Cloud:** AWS S3 for storage
-- **Deployment:** Docker-ready
+- **Backend:** Go 1.21+ with Gin framework
+- **Auth:** JWT v5 with bcrypt password hashing
+- **Cloud:** AWS SDK v2 for S3
+- **Logging:** Native OS commands (macOS `log`, Windows PowerShell)
 
 ## Quick Start
 
-### Prerequisites
+### 1. Prerequisites
 
-- Go 1.21+
-- AWS Account with S3 bucket
-- AWS CLI configured
+- Go 1.21 or higher
+- AWS account with S3 bucket access
+- macOS or Windows machine
 
-### Setup
+### 2. Configure Environment
 
-1. **Configure AWS Credentials**
-
-```bash
-mkdir -p ~/.aws
-nano ~/.aws/credentials
-```
-
-Add your credentials:
-
-```ini
-[kaimz_tdr]
-aws_access_key_id = YOUR_ACCESS_KEY_ID
-aws_secret_access_key = YOUR_SECRET_ACCESS_KEY
-```
-
-Set region (optional):
+Create `/backend/.env`:
 
 ```bash
-nano ~/.aws/config
+# AWS Configuration
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=us-east-1
+S3_BUCKET=kaimz-tdr
+
+# Server Configuration
+JWT_SECRET=your-super-secret-key-change-this
+PORT=1514
 ```
 
-```ini
-[kaimz_tdr]
-region = us-east-1
-```
-
-2. **Configure Backend**
-
-```bash
-cd backend
-cp .env.example .env
-# Edit .env:
-# - JWT_SECRET (generate: openssl rand -base64 32)
-# - S3_BUCKET (your bucket name)
-# - AWS_REGION (default: us-east-1)
-```
-
-3. **Run Server**
+### 3. Run Server
 
 ```bash
 cd backend
 go mod download
-export $(cat .env | xargs)
 go run cmd/main.go
 ```
 
-Server starts at `http://localhost:8080`
+You'll be prompted:
+
+```
+Enter server port (default '1514'): [press enter or type custom port]
+How often should logs be fetched (in hours, default 'Once on load'): [press enter or type 1, 2, 24, etc.]
+```
+
+**Examples:**
+
+- Press Enter twice → Uses port 1514, fetches logs once on startup
+- Type `8080` then `2` → Uses port 8080, fetches logs every 2 hours
+- Type `3000` then `0.5` → Uses port 3000, fetches logs every 30 minutes
 
 ## API Endpoints
 
-### Public Routes
+### Authentication (Public)
 
 ```bash
-# Register user
+# Register new user
 POST /auth/register
-{"email": "user@example.com", "password": "pass123"}
+Content-Type: application/json
+{"email": "user@example.com", "password": "password123"}
 
 # Login
 POST /auth/login
-{"email": "user@example.com", "password": "pass123"}
+Content-Type: application/json
+{"email": "user@example.com", "password": "password123"}
 # Returns: {"token": "eyJhbG...", "user": {...}}
 ```
 
-### Protected Routes (Require JWT)
-
-Add header: `Authorization: Bearer <token>`
+### Logs (Public - Auth Commented Out)
 
 ```bash
 # Get current user info
 GET /api/me
 
-# Upload log to S3
+# Upload custom log to S3
 POST /api/logs/upload
-{"log": "your log content"}
+Content-Type: application/json
+{"log": "your custom log content"}
+
+# List all logs in S3
+GET /api/logs
+
+# Manually trigger network log fetch and upload
+POST /api/logs/fetch-network
+```
+
+## How It Works
+
+### Automatic Log Collection
+
+1. **On Startup:** Server automatically fetches network logs and uploads to S3
+2. **Recurring (Optional):** If you set an interval, logs are fetched every N hours
+3. **Cross-Platform:**
+   - **macOS:** Uses `log show --predicate 'subsystem CONTAINS "network"'`
+   - **Windows:** Uses PowerShell to query Windows Event Log
+
+### Log Storage
+
+All logs are stored in your S3 bucket with timestamped filenames:
+
+```
+s3://kaimz-tdr/logs-2025-11-11T14-30-45.txt
+```
+
+## Project Structure
+
+```
+kaimz_tdr/
+├── backend/
+│   ├── cmd/
+│   │   └── main.go              # Entry point (clean and simple)
+│   ├── config/
+│   │   └── config.go            # Environment configuration
+│   ├── internal/
+│   │   ├── aws/
+│   │   │   └── s3.go            # S3 client and operations
+│   │   ├── handlers/
+│   │   │   ├── auth.go          # Auth handlers
+│   │   │   ├── logs.go          # Log upload handlers
+│   │   │   └── network_logs.go  # Network log handlers
+│   │   ├── logging/
+│   │   │   └── logging.go       # OS-specific log collection
+│   │   ├── routes/
+│   │   │   └── routes.go        # API route definitions
+│   │   ├── scheduler/
+│   │   │   └── log_scheduler.go # Recurring log fetch scheduler
+│   │   └── startup/
+│   │       ├── init.go          # S3 and scheduler initialization
+│   │       └── prompts.go       # Interactive user prompts
+│   ├── .env                     # Environment variables
+│   └── go.mod
+└── README.md
+```
+
+## Development
+
+### Test Endpoints
+
+```bash
+# Register and get token
+curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@kaimz.com","password":"test123"}'
+
+# Upload custom log
+curl -X POST http://localhost:8080/api/logs/upload \
+  -H "Content-Type: application/json" \
+  -d '{"log":"Custom log entry from API"}'
+
+# Trigger manual network log fetch
+curl -X POST http://localhost:8080/api/logs/fetch-network
 
 # List all logs
-GET /api/logs
+curl http://localhost:8080/api/logs
 ```
 
-## Development Workflow
+## Configuration Options
 
-```bash
-# Quick test
-TOKEN=$(curl -s -X POST http://localhost:8080/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"pass123"}' | jq -r '.token')
-
-curl -X POST http://localhost:8080/api/logs/upload \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"log":"Test log from Kaimz agent"}' | jq .
-```
-
-## Docker Deployment
-
-```bash
-cd backend
-docker build -t kaimz-backend .
-docker run -p 8080:8080 \
-  -e JWT_SECRET="your-secret" \
-  -e S3_BUCKET="your-bucket" \
-  -e AWS_REGION="us-east-1" \
-  -v ~/.aws:/root/.aws:ro \
-  kaimz-backend
-```
+| Variable                | Required | Default     | Description                      |
+| ----------------------- | -------- | ----------- | -------------------------------- |
+| `AWS_ACCESS_KEY_ID`     | Yes      | -           | AWS access key for S3            |
+| `AWS_SECRET_ACCESS_KEY` | Yes      | -           | AWS secret key for S3            |
+| `AWS_REGION`            | No       | `us-east-1` | AWS region for S3 bucket         |
+| `S3_BUCKET`             | Yes      | `kaimz-tdr` | S3 bucket name for log storage   |
+| `JWT_SECRET`            | Yes      | `TEST`      | Secret key for JWT token signing |
+| `PORT`                  | No       | `1514`      | Server port (Wazuh default)      |
 
 ## Project Status
 
-🚧 **Active Development** - This is an ongoing Riipen project
+🚀 **Active Development** - Riipen Project
 
-Current Phase:
+**Completed:**
 
-- ✅ JWT Authentication system
-- ✅ AWS S3 integration for logs
-- ✅ RESTful API foundation
-- 🚧 AI Agent capabilities (in progress)
-- 🚧 Advanced automation features (planned)
+- ✅ Cross-platform network log collection (Windows/macOS)
+- ✅ Automatic S3 upload on startup
+- ✅ Flexible scheduling (one-time or recurring)
+- ✅ Interactive configuration prompts
+- ✅ Clean, modular architecture
+- ✅ JWT authentication system
+- ✅ RESTful API with log management
 
-## Environment Variables
+**In Progress:**
 
-| Variable     | Required | Description                     |
-| ------------ | -------- | ------------------------------- |
-| `JWT_SECRET` | Yes      | JWT token signing secret        |
-| `S3_BUCKET`  | Yes      | AWS S3 bucket name              |
-| `AWS_REGION` | No       | AWS region (default: us-east-1) |
-| `PORT`       | No       | Server port (default: 8080)     |
-
-## Riipen Collaboration
-
-This project is developed as part of a Riipen educational partnership, focused on:
-
-- Real-world AI agent development
-- Production-grade backend architecture
-- Cloud infrastructure integration
-- Secure authentication systems
-
-## Contributing
-
-This is an active development repository. For questions or collaboration:
-
-- Review the backend README for detailed API documentation
-- Check open issues for current development tasks
-- Follow Go best practices and project conventions
+- 🚧 AI agent capabilities
+- 🚧 Advanced log analysis
+- 🚧 Real-time log streaming
 
 ## License
 

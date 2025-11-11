@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 
-	// "backend/internal/auth"
+	"backend/internal/auth"
 	"backend/internal/handlers"
 )
 
@@ -23,7 +23,7 @@ func SetupRoutes(r *gin.Engine, secret []byte) {
 
 	// Protected routes - require valid JWT
 	api := r.Group("/api")
-	// api.Use(auth.AuthMiddleware(secret)) // Apply authentication middleware
+	api.Use(auth.AuthMiddleware(secret)) // Apply authentication middleware
 	{
 		// Example protected endpoint - returns user info from JWT
 		api.GET("/me", handlers.GetCurrentUser())
@@ -31,9 +31,6 @@ func SetupRoutes(r *gin.Engine, secret []byte) {
 		// S3 Log upload endpoints
 		api.POST("/logs/upload", handlers.UploadLog())
 		api.GET("/logs", handlers.ListLogs())
-		
-		// Network logs - fetch macOS network logs and upload to S3
-		api.POST("/logs/fetch-network", handlers.FetchAndUploadLogs())
 
 		// Any other protected routes go here
 		// api.GET("/data", handlers.GetData())
