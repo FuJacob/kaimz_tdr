@@ -1,5 +1,4 @@
 package startup
-package startup
 
 import (
 	"bufio"

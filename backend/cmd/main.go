@@ -8,9 +8,17 @@ import (
 	"backend/internal/startup"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found, using system environment variables")
+	} else {
+		log.Println("✅ Loaded .env file")
+	}
+
 	// Load configuration
 	cfg := config.Load()
 

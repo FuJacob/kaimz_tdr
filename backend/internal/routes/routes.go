@@ -10,6 +10,9 @@ import (
 // SetupRoutes configures all application routes
 func SetupRoutes(r *gin.Engine, secret []byte) {
 	// Health check
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"Kaimz Agent is currently running.": "ok"})
+	})
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
