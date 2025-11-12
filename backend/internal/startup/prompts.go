@@ -50,7 +50,7 @@ func PromptForLogInterval() (time.Duration, bool) {
 	} else {
 		fmt.Println("  ✓ Logs will be fetched once on server startup")
 	}
-	
+
 	fmt.Println()
 	return fetchInterval, runOnce
 }

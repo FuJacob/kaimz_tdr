@@ -25,7 +25,7 @@ func PrintBanner() {
 ╚════════════════════════════════════════════════════════════════╝
 `
 	fmt.Println(banner)
-	
+
 	// System information
 	fmt.Printf("  System: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 	fmt.Printf("  Go Version: %s\n", runtime.Version())
