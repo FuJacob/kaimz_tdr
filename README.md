@@ -1,4 +1,4 @@
-# Kaimz TDR
+# Kaimz Agent
 
 Cross-platform network log monitoring and S3 storage system with JWT authentication.
 
