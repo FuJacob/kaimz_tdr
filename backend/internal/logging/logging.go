@@ -50,7 +50,7 @@ func FetchLogs(lastPeriodLength int) string {
 
 		cmd = exec.Command("powershell", "-Command", psScript)
 		output, err = cmd.CombinedOutput()
-		
+
 		if err != nil {
 			fmt.Printf("Error fetching Windows logs: %v\n", err)
 			return ""
@@ -66,12 +66,12 @@ func FetchLogs(lastPeriodLength int) string {
 			"--last", period,
 		)
 		output, err = cmd.CombinedOutput()
-		
+
 		if err != nil {
 			fmt.Printf("Error fetching macOS logs: %v\n", err)
 			return ""
 		}
-		
+
 		// Limit macOS logs to configured max lines
 		lines := strings.Split(string(output), "\n")
 		if len(lines) > constants.MaxLogLines {
