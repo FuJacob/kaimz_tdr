@@ -21,6 +21,7 @@ Cross-platform network log monitoring and S3 storage system with JWT authenticat
 **1. Environment Configuration**
 
 Create `backend/.env`:
+
 ```env
 AWS_ACCESS_KEY_ID=your_key
 AWS_SECRET_ACCESS_KEY=your_secret
@@ -48,12 +49,14 @@ How often should logs be fetched (in hours, default 'Once on load'): [Enter once
 ## API
 
 ### Authentication
+
 ```bash
 POST /auth/register  # {"email": "user@example.com", "password": "pass"}
 POST /auth/login     # {"email": "user@example.com", "password": "pass"}
 ```
 
 ### Logs
+
 ```bash
 GET  /api/me                      # Get current user
 POST /api/logs/upload             # Upload custom log
@@ -80,14 +83,14 @@ backend/
 
 ## Configuration
 
-| Variable                | Required | Default     | Description              |
-| ----------------------- | -------- | ----------- | ------------------------ |
-| `AWS_ACCESS_KEY_ID`     | Yes      | -           | AWS S3 access key        |
-| `AWS_SECRET_ACCESS_KEY` | Yes      | -           | AWS S3 secret key        |
-| `AWS_REGION`            | No       | `us-east-1` | AWS region               |
-| `S3_BUCKET`             | Yes      | `kaimz-tdr` | S3 bucket name           |
-| `JWT_SECRET`            | Yes      | `TEST`      | JWT signing key          |
-| `PORT`                  | No       | `1514`      | Server port              |
+| Variable                | Required | Default     | Description       |
+| ----------------------- | -------- | ----------- | ----------------- |
+| `AWS_ACCESS_KEY_ID`     | Yes      | -           | AWS S3 access key |
+| `AWS_SECRET_ACCESS_KEY` | Yes      | -           | AWS S3 secret key |
+| `AWS_REGION`            | No       | `us-east-1` | AWS region        |
+| `S3_BUCKET`             | Yes      | `kaimz-tdr` | S3 bucket name    |
+| `JWT_SECRET`            | Yes      | `TEST`      | JWT signing key   |
+| `PORT`                  | No       | `1514`      | Server port       |
 
 ## Development
 
