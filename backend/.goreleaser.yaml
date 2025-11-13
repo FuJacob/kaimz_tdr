@@ -1,9 +1,9 @@
 version: 2
 
 builds:
-  - id: kaimz_backend
+  - id: kaimz_agent
     main: ./cmd/main.go
-    binary: kaimz_backend
+    binary: kaimz_agent
     env:
       - CGO_ENABLED=0
     goos:
@@ -17,9 +17,9 @@ builds:
       - -trimpath
 
 archives:
-  - id: kaimz_backend_archive
+  - id: kaimz_agent_archive
     builds:
-      - kaimz_backend
+      - kaimz_agent
     format: zip
     format_overrides:
       - goos: linux
