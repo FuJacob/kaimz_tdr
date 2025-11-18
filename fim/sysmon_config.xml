@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Sysmon schemaversion="4.90">
+  <!-- Minimal config to emit file create/delete events only for the paths in fim_config.yml -->
+   <!-- Make sure the add your paths into Sysmon to configure it properly -->
+  <HashAlgorithms>sha256</HashAlgorithms>
+  <EventFiltering>
+    <!-- File create events -->
+    <FileCreate onmatch="include">
+      <!-- Windows registry hives in System32\config -->
+      <TargetFilename condition="is">C:\Windows\System32\config\SAM</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SECURITY</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SOFTWARE</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SYSTEM</TargetFilename>
+    </FileCreate>
+
+    <!-- File delete events -->
+    <FileDelete onmatch="include">
+      <TargetFilename condition="is">C:\Windows\System32\config\SAM</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SECURITY</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SOFTWARE</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SYSTEM</TargetFilename>
+    </FileDelete>
+
+    <!-- File delete detected (for delete by handle close) -->
+    <FileDeleteDetected onmatch="include">
+      <TargetFilename condition="is">C:\Windows\System32\config\SAM</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SECURITY</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SOFTWARE</TargetFilename>
+      <TargetFilename condition="is">C:\Windows\System32\config\SYSTEM</TargetFilename>
+    </FileDeleteDetected>
+  </EventFiltering>
+</Sysmon>
